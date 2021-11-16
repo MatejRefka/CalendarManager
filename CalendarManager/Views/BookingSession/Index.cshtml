@@ -1,0 +1,1089 @@
+﻿@{
+    ViewData["Title"] = "Booking";
+}
+
+<main id="booking">
+
+    <nav class="bookingHeader">
+
+    </nav>
+
+    <div class="bookingMainContent">
+
+        <section class="fullCalendar">
+
+            <section class="calendarControl">
+                <span class="currentMonthYear">{{currentMonthYear}}</span>
+                <div class="navButtons">
+                    <button class="navButton" v-on:click="loadPreviousWeek" :disabled="previousDisabled"><</button>
+                    <button class="navButton" v-on:click="loadNextWeek">></button>
+                </div>
+            </section>
+
+            <table class="calendarHeader">
+                <tr>
+                    <th class="headerCell" v-for="(e, i) in 7" :key="i" :id="'headr' + i">
+                        <p class="headerWeek">{{currentDates[i]}}</p>
+                        <p class="headerDate">{{daysOfTheWeek[i]}}</p>
+                    </th>
+                </tr>
+            </table>
+
+            <article id="calendarWrapper">
+                <table class="calendarTimeLabels">
+                    <tr v-for="(e, i) in 9" :key="i">
+                        <td id="'time' + i">
+                            <p>0{{i+1}}:00</p>
+                        </td>
+                    </tr>
+                    <tr v-for="(e, i) in 14" :key="i">
+                        <td id="'time' + i">
+                            <p>{{i+10}}:00</p>
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="calendarBody">
+                    <tr>
+                        <td v-for="(e, i) in 7" :key="i" :id="'day' + i">
+                            <button class="bookingBookingButton" v-on:click="bookingSession($event)" v-for="(e, j) in 288" :key="j" :id="'but' + i + ',' + j" v-bind:ref="'but' + i + ',' + j">
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+            </article>
+
+        </section>
+
+        <aside class="sideMenu">
+
+            <p>Click on an available 'Booking Slot' to register a slot.</p>
+
+            <p>WARNING: Upon 'Submit', the slot is booked to user's calendar</p>
+
+
+        </aside>
+
+        </div>
+
+        <article class="bookingPopup" ref="periodContainer">
+            <p class="popupTitle">Register this booking slot on {{popupDay}}, {{popupDate}} {{popupMonth}}, {{popupStartTime}}-{{popupEndTime}}.</p>
+            <div class="popupBox">
+                <p class="popupTitle">@ViewBag.PeriodName:</p>
+                <input class="outerText" type="text" value="" ref="periodName" maxlength="100">
+            </div>
+            <p ref="popupError"></p>
+            <button class="outerButton" v-on:click="submitBookingPeriod">Submit</button>
+            <button class="outerButton" v-on:click="cancelBookingSession">Cancel</button>
+        </article>
+
+        <article class="bookingPopup" ref="nonPeriodContainer">
+            <p>Register a custom booking slot on {{popupDay}}, {{popupDate}} {{popupMonth}}.</p>
+            <div class="popupTime">
+                <p>Time:&nbsp;</p>
+                <p ref="inputTime"></p>
+            </div>
+            <div class="popupTime">
+                <p>PeriodName:</p>
+                <input class="outerText" type="text" value="" ref="inputPeriodName" maxlength="100">
+            </div>
+            <p ref="popupError"></p>
+            <button class="outerButton" v-on:click="submitBookingNonPeriod">Submit</button>
+            <button class="outerButton" v-on:click="cancelBookingSession">Cancel</button>
+        </article>
+        <div class="overlay" ref="popupOverlay" v-on:click="cancelBookingSession"></div>
+
+
+        <input type="hidden" ref="enforceResult" data-value="@ViewBag.EnforcePeriod" />
+        <input type="hidden" ref="email" data-value="@ViewBag.Email" />
+        <input type="hidden" ref="raceCondition" data-value="@ViewBag.Racecondition" />
+
+</main>
+
+<script type="text/javascript">
+
+    var booking = new Vue({
+        el: '#booking',
+        data: {
+            title: "Calendar",
+            previousButton: false,
+            timeFrame: "",
+            currentDate: "",
+            date: "",
+            weekDates: "",
+            day: "",
+            month: "",
+            longEvents: [],
+            enforcePeriod: false,
+            periodName: "",
+            period: "",
+            popupStartMinutes: "",
+            popupEndMinutes: "",
+            popupStartTime: "",
+            popupEndTime: "",
+            popupDay: "",
+            popupDate: "",
+            popupMonth: "",
+            popupYear: "",
+            bookedEvents: [],
+            bookedEventsPrint: [],
+            eventsList: JSON.parse('@Html.Raw(Json.Serialize(ViewBag.BookingsList))'),
+            year: "",
+            daysOfTheWeek: [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+            ],
+            monthsOfTheYear: [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
+            ],
+            daysInAMonth: [
+                "31",
+                "28",
+                "31",
+                "30",
+                "31",
+                "30",
+                "31",
+                "31",
+                "30",
+                "31",
+                "30",
+                "31"
+            ],
+            eventColors: [
+                "#039be5", //peacock ID:null
+                "#7986cb", //lavender ID:1
+                "#33b679", //sage ID:2
+                "#8e24aa", //grape ID:3
+                "#e67c73", //flamingo ID:4
+                "#f6bf26", //banana ID:5
+                "#f4511e", //tangerine ID:6
+                "#616161", //graphite ID:8
+                "#3f51b5", //blueberry ID:9
+                "#0b8043", //basil ID:10
+                "#d50000" //tomato ID:11
+            ]
+
+        },
+        created: function () {
+            this.currentDate = new Date();
+            this.date = this.currentDate.getDate();
+            this.month = this.currentDate.getMonth();
+            this.year = this.currentDate.getFullYear();
+            this.day = this.currentDate.getDay();
+            this.filterLongEvents();
+            
+        },
+        mounted() {
+
+            this.populateEvents();
+            this.populateBookingEvents();
+            
+        },
+        computed: {
+            daysInFebruary: function () {
+
+                if ((this.year % 4) == 0) {
+                    daysInAMonth[1] = "29";
+                }
+                else {
+                    daysInAMonth[1] = "28";
+                }
+            },
+            previousDisabled: function () {
+                if (this.year <= 2010) {
+                    return !this.previousButton;
+                }
+            },
+            currentMonthYear: function () {
+
+                var date = this.date;
+                var month = this.month;
+                var year = this.year;
+                var day = this.day; //Monday=1, Tuesday=2, Wednesday=3, Thursday=4, Friday=5, Saturday=6, Sunday=0
+
+                //days of the week into array position: Monday=0, Tuesday=1,... Sunday=6
+                if (day == 0) {
+                    day = 6;
+                }
+                else {
+                    day--;
+                }
+
+                //if a previous day in the week belongs to the previous month
+                if ((date - day) <= 0) {
+                    if (month == 0) {
+                        return this.monthsOfTheYear[11] + "-" + this.monthsOfTheYear[month] + " " + year;
+                    }
+                    else {
+                        return this.monthsOfTheYear[month - 1] + "-" + this.monthsOfTheYear[month] + " " + year;
+                    }
+                }
+
+                //if there is a future day iin the week belonging to the next month
+                else if ((date + 6 - day) > this.daysInAMonth[month]) {
+                    if (month == 11) {
+                        return this.monthsOfTheYear[month] + "-" + this.monthsOfTheYear[0] + " " + year;
+                    }
+                    else {
+                        return this.monthsOfTheYear[month] + "-" + this.monthsOfTheYear[month + 1] + " " + year;
+                    }
+
+                }
+
+                return this.monthsOfTheYear[month] + " " + year;
+
+            },
+            currentDates: function () {
+
+                var date = this.date;
+                var month = this.month;
+                var day = this.day; //Monday=1, Tuesday=2, Wednesday=3, Thursday=4, Friday=5, Saturday=6, Sunday=0
+                var year = this.year;
+
+
+
+                return this.weekDayArray(day, date, month, year);
+
+            },
+            noBookings: ({ bookedEvents }) => bookedEvents.length === 0
+        },
+
+        methods: {
+            //log for debugging and testing
+            log() {
+
+
+            },
+            //given a day (Monday) and a date (1st), return a date for every day in the week
+            weekDayArray(day, date, month, year) {
+
+                //days of the week into array position: Monday=0, Tuesday=1,... Sunday=6
+                if (day == 0) {
+                    day = 6;
+                }
+                else {
+                    day--;
+                }
+
+                if ((year % 4) == 0) {
+                    this.daysInAMonth[1] = "29";
+                }
+                else {
+                    this.daysInAMonth[1] = "28";
+                }
+
+                var originalDate = date;
+                var dates = new Array(7);
+                dates[day] = date;
+
+                //fill the current day and all the proceeding days
+                for (let i = day; i < dates.length && date <= this.daysInAMonth[month]; i++) {
+                    dates[i] = date;
+                    date++;
+                }
+
+                //if during a week, a month ends (current day) and a new one starts
+                if (date > this.daysInAMonth[month] && dates[6] == null) {
+
+                    if (dates[1] == null && dates[2] == null && dates[3] == null && dates[4] == null && dates[5] == null && dates[6] == null) {
+                        for (let i = 1, j = 1; i < 7; i++, j++) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[2] == null && dates[3] == null && dates[4] == null && dates[5] == null && dates[6] == null) {
+                        for (let i = 2, j = 1; i < 7; i++, j++) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[3] == null && dates[4] == null && dates[5] == null && dates[6] == null) {
+                        for (let i = 3, j = 1; i < 7; i++, j++) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[4] == null && dates[5] == null && dates[6] == null) {
+                        for (let i = 4, j = 1; i < 7; i++, j++) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[5] == null && dates[6] == null) {
+                        for (let i = 5, j = 1; i < 7; i++, j++) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[6] == null) {
+                        dates[6] = 1;
+                    }
+                }
+
+                //reset the date
+                date = originalDate;
+
+
+                //fill the current day and all the preceding days
+                for (let i = day; i >= 0 && date > 0; i--) {
+                    dates[i] = date;
+                    date--;
+                }
+
+
+                //if during a week, a month ends and a new one starts (current day)
+                if (date == 0 && dates[0] == null) {
+                    //grab the max number of days from previous month
+                    var maxDays;
+                    if (month == 0) {
+                        maxDays = this.daysInAMonth[11];
+                    }
+                    else {
+                        maxDays = this.daysInAMonth[month - 1];
+                    }
+                    if (dates[5] == null) {
+                        for (let i = 5, j = maxDays; i >= 0; i--, j--) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[4] == null) {
+                        for (let i = 4, j = maxDays; i >= 0; i--, j--) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[3] == null) {
+                        for (let i = 3, j = maxDays; i >= 0; i--, j--) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[2] == null) {
+                        for (let i = 2, j = maxDays; i >= 0; i--, j--) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[1] == null) {
+                        for (let i = 1, j = maxDays; i >= 0; i--, j--) {
+                            dates[i] = j;
+                        }
+                    }
+                    if (dates[0] == null) {
+                        dates[0] = maxDays;
+                    }
+
+                }
+                this.weekDates = dates;
+                return dates;
+            },
+            loadNextWeek() {
+
+                //update currentMonthYear and currentDates[i]
+
+                var date = this.date;
+                var month = this.month;
+                var year = this.year;
+                var day = this.day;
+
+                date = date + 7;
+                if (date > this.daysInAMonth[month]) {
+                    date = date - this.daysInAMonth[month];
+                    if (month == 11) {
+                        month = 0;
+                        year++;
+                    } else {
+                        month++;
+                    }
+                }
+
+                this.date = date;
+                this.month = month;
+                this.year = year;
+                this.weekDayArray(day, date, month, year);
+
+                //update events
+                this.populateEvents();
+
+                //update booked events
+                this.populateBookingEvents();
+            },
+            loadPreviousWeek() {
+
+                var date = this.date;
+                var month = this.month;
+                var year = this.year;
+                var day = this.day;
+
+                //update currentMonthYear and currentDates[i]
+                date = date - 7;
+
+                if (date <= 0) {
+                    date = parseFloat(date) + parseFloat(this.daysInAMonth[month]);
+
+                    if (month == 0) {
+                        month = 11;
+                        year--;
+                    }
+                    else {
+                        month--;
+                    }
+                }
+
+                this.date = date;
+                this.month = month;
+                this.year = year;
+
+                this.weekDayArray(day, date, month, year);
+
+                //update events
+                this.populateEvents();
+
+                //update booked events
+                this.populateBookingEvents();
+
+            },
+            populateEvents() {
+
+                //reset all buttons first
+                for (let i = 0; i < 7; i++) {
+                    for (let j = 0; j < 288; j++) {
+
+                        var button = "but" + i + "," + j;
+
+                        this.$refs[button][0].style.display = "block";
+                        this.$refs[button][0].disabled = true;
+                        this.$refs[button][0].cursor = "default";
+                        this.$refs[button][0].style.width = "9vw";
+                        this.$refs[button][0].style.height = "5px";
+                        this.$refs[button][0].style.color = "#ffffff";
+                        this.$refs[button][0].style.background = "#14213d";
+                        if ((j + 1) % 12 == 0) {
+                            this.$refs[button][0].style["border-bottom"] = "1px solid #ffffff";
+                        }
+                        else {
+                            this.$refs[button][0].style["border-bottom"] = "0px solid #ffffff";
+                        }
+                        this.$refs[button][0].style["border-top"] = "0px solid #ffffff";
+                        this.$refs[button][0].style["border-right"] = "0px solid #ffffff";
+                        this.$refs[button][0].style["border-left"] = "0px solid #ffffff";
+                    }
+                }
+
+                //find all events in the current week from a fresh date
+                var month = this.month;
+                var year = this.year;
+
+                var weekDays = this.weekDates;
+
+                //helper variables to identify events spanning between two months
+                var currentMonth = this.month;
+                var nextMonth;
+                var previousMonth;
+
+                if (currentMonth == 11) {
+                    nextMonth = 0;
+                }
+                else {
+                    nextMonth = currentMonth + 1;
+                }
+                if (currentMonth == 0) {
+                    previousMonth = 11;
+                }
+                else {
+                    previousMonth = (currentMonth - 1);
+                }
+
+                for (let i = 0; i < this.eventsList.length; i++) {
+                    //handle event regions that start this week
+                    if (this.eventsList[i].startYear == year && this.eventsList[i].startMonth == month) {
+
+                        for (let j = 0; j < weekDays.length; j++) {
+                            if (this.eventsList[i].startDate == weekDays[j] && !(weekDays.includes(1) && weekDays[0] != 1 && this.date > 20 && this.eventsList[i].startDate < 10)) {
+
+
+
+                                //get the first button from start hrs+min
+                                var startHour = this.eventsList[i].startHour;
+                                var startMinute = this.eventsList[i].startMinute;
+                                var startDayOfWeek = this.eventsList[i].startDayOfWeek;
+
+                                //index of button for already given day
+                                var kStart;
+                                if (startMinute == 0) {
+                                    kStart = 0 + (12 * startHour);
+                                } else {
+                                    kStart = (startMinute / 5) + (12 * startHour);
+                                }
+
+                                var firstButton = "but" + this.daysOfTheWeek.indexOf(startDayOfWeek) + "," + kStart;
+
+                                //get the last button from last hrs+min
+                                var endHour = this.eventsList[i].endHour;
+                                var endMinute = this.eventsList[i].endMinute;
+                                var endDayOfWeek = this.eventsList[i].endDayOfWeek;
+
+                                //index of last button for already given day
+                                var kEnd;
+
+                                if (endMinute == 0) {
+                                    kEnd = 0 + (12 * endHour);
+                                } else {
+                                    kEnd = (endMinute / 5) + (12 * endHour);
+                                }
+                                //if the event ends on a different day, only consider buttons up to button 287
+                                var daysInbetween = this.daysOfTheWeek.indexOf(endDayOfWeek) - this.daysOfTheWeek.indexOf(startDayOfWeek);
+                                if (daysInbetween > 0 || daysInbetween == -6) {
+                                    kEnd = 288;
+                                }
+
+
+                                this.$refs[firstButton][0].disabled = false;
+
+                                //clean up Google's mess with event summary
+                                var eventName = this.eventsList[i].name;
+                                if (eventName == null) {
+                                    eventName = "Event name not specified";
+                                }
+                                this.$refs[firstButton][0].innerText = eventName;
+
+                                //clean up Google's mess with color IDs
+                                var colorID = this.eventsList[i].colorID;
+                                if (colorID == null) {
+                                    colorID = 0;
+                                }
+                                else if (colorID > 6) {
+                                    colorID--;
+                                }
+
+                                this.$refs[firstButton][0].style.background = "#fca311";
+                                this.$refs[firstButton][0].style.border = "1px solid " + "#ffffff";
+                                this.$refs[firstButton][0].style["border-radius"] = "1px";
+
+                                var deletedButton;
+                                var deletedButtonsCount = 1;
+                                for (let i = kStart + 1; i < kEnd; i++) {
+
+                                    deletedButton = "but" + this.daysOfTheWeek.indexOf(startDayOfWeek) + "," + i;
+                                    this.$refs[deletedButton][0].style.display = "none";
+                                    deletedButtonsCount++;
+                                }
+
+                                this.$refs[firstButton][0].style.cursor = "pointer";
+                                this.$refs[firstButton][0].style.height = 5 * deletedButtonsCount + "px";
+
+                            }
+                        }
+                    }
+
+                    //handle event regions that end this week
+                    if ((this.eventsList[i].endYear == year && this.eventsList[i].endMonth == month && this.eventsList[i].startMonth == this.eventsList[i].endMonth && this.eventsList[i].startYear == this.eventsList[i].endYear) ||
+                        (this.eventsList[i].endMonth == month && this.eventsList[i].startMonth == previousMonth && this.date < 15) ||
+                        (this.eventsList[i].startMonth == month && this.eventsList[i].endMonth == nextMonth && this.date > 15)) {
+                        for (let j = 0; j < weekDays.length; j++) {
+                            if ((this.eventsList[i].endDate == weekDays[j]) && (this.eventsList[i].endDate != this.eventsList[i].startDate)) {
+
+                                //get the last button from end hrs+min
+                                var endHour = this.eventsList[i].endHour;
+                                var endMinute = this.eventsList[i].endMinute;
+                                var endDayOfWeek = this.eventsList[i].endDayOfWeek;
+
+                                //index of last button for already given day
+                                var kEnd;
+
+                                if (endMinute == 0) {
+                                    kEnd = 0 + (12 * endHour) - 1;
+                                } else {
+                                    kEnd = (endMinute / 5) + (12 * endHour) - 1;
+                                }
+
+                                var lastButton = "but" + this.daysOfTheWeek.indexOf(endDayOfWeek) + "," + kEnd;
+
+                                this.$refs[lastButton][0].disabled = false;
+
+                                //clean up Google's mess with event summary
+                                var eventName = this.eventsList[i].name;
+                                if (eventName == null) {
+                                    eventName = "Event name not specified";
+                                }
+                                this.$refs[lastButton][0].innerText = eventName;
+
+                                //clean up Google's mess with color IDs
+                                var colorID = this.eventsList[i].colorID;
+                                if (colorID == null) {
+                                    colorID = 0;
+                                }
+                                else if (colorID > 6) {
+                                    colorID--;
+                                }
+                                this.$refs[lastButton][0].style.background = "#35455D";
+
+                                var deletedButton;
+                                var deletedButtonsCount = 1;
+                                for (let l = kEnd - 1; l >= 0; l--) {
+                                    deletedButton = "but" + this.daysOfTheWeek.indexOf(endDayOfWeek) + "," + l;
+                                    this.$refs[deletedButton][0].style.display = "none";
+                                    deletedButtonsCount++;
+                                }
+
+                                this.$refs[lastButton][0].style.cursor = "pointer";
+                                this.$refs[lastButton][0].style.height = 5 * deletedButtonsCount + "px";
+
+                            }
+                        }
+                    }
+                }
+            },
+            //all events that span over 3 or more days are placed in a list of events instead of the calendar
+            filterLongEvents() {
+
+                for (let i = this.eventsList.length - 1; i >= 0; i--) {
+                    //difference between dates is 2 or more days
+                    if (this.eventsList[i].endDate - this.eventsList[i].startDate > 1) {
+                        this.longEvents.push(this.eventsList[i]);
+                        this.eventsList.splice(i, 1);
+                    }
+                    //difference between dates is two or more months
+                    else if (this.eventsList[i].endMonth - this.eventsList[i].startMonth > 1) {
+                        this.longEvents.push(this.eventsList[i]);
+                        this.eventsList.splice(i, 1);
+                    }
+                    //difference between dates is two or more years
+                    else if (this.eventsList[i].endYear - this.eventsList[i].startYear > 1) {
+                        this.longEvents.push(this.eventsList[i]);
+                        this.eventsList.splice(i, 1);
+                    }
+                    //final case covers overlap between two months. Any event with starting date not the max of the month AND ending date not 1st of the month
+                    else if ((this.eventsList[i].startMonth != this.eventsList[i].endMonth) && (this.eventsList[i].startDate < this.daysInAMonth[this.eventsList[i].startMonth] || this.eventsList[i].endDate > 1)) {
+                        this.longEvents.push(this.eventsList[i]);
+                        this.eventsList.splice(i, 1);
+                    }
+                }
+
+                //remove all past events from the long events list
+                for (let i = this.longEvents.length - 1; i >= 0; i--) {
+                    if (this.longEvents[i].endYear < this.year) {
+                        this.longEvents.splice(i, 1);
+                    }
+                    else if (this.longEvents[i].endYear == this.year && this.longEvents[i].endMonth < this.month) {
+                        this.longEvents.splice(i, 1);
+                    }
+                    else if (this.longEvents[i].endYear == this.year && this.longEvents[i].endMonth == this.month && this.longEvents[i].endDate < this.date) {
+                        this.longEvents.splice(i, 1);
+                    }
+                }
+
+                //sort events from earliest endDate to latest endDate
+                this.longEvents.sort(function (a, b) {
+                    if (a.endYear == b.endYear && a.endMonth == b.endMonth) {
+                        return a.endDate - b.endDate;
+                    }
+                    else if (a.endYear == b.endYear) {
+                        return a.endMonth - b.endMonth;
+                    }
+                    return a.endYear - b.endYear;
+                })
+
+            },
+            bookingSession(event) {
+
+                //enable popup
+                if (this.$refs.enforceResult.dataset.value == "True") {
+                    this.$refs.periodContainer.classList.add('active');
+                }
+                if (this.$refs.enforceResult.dataset.value == "False") {
+                    this.$refs.nonPeriodContainer.classList.add('active');
+                }
+
+                this.$refs.popupOverlay.classList.add('active');
+
+                //reset error messages
+                this.$refs.popupError.innerHTML = "&nbsp;";
+
+                //get day and starting hour from button ID
+                var buttonID = event.currentTarget.id;
+                buttonID = buttonID.substring(3);
+                var tempArr = buttonID.split(',');
+                var day = tempArr[0];
+                var startingHour = Math.floor(tempArr[1] / 12);
+                var endingHour;
+                if (startingHour == 23) {
+                    endingHour = 0;
+                }
+                else {
+                    endingHour = startingHour + 1;
+                }
+
+                this.popupDay = this.daysOfTheWeek[day];
+                this.popupDate = this.weekDates[day];
+
+                //get the event start and end time of a clicked button
+                var totalStartMinutes = tempArr[1] * 5;
+                this.popupStartMinutes = totalStartMinutes;
+                var count = 0;
+
+                for (let i = tempArr[1]; i < 278; i++) {
+
+                    nextSlot = parseInt(i) + 1;
+                    var nextButId = "but" + day + "," + nextSlot;
+
+                    count++;
+
+                    if (this.$refs[nextButId][0].style.display == "block") {
+                        break;
+                    }
+                }
+
+                var totalEndMinutes = totalStartMinutes + (5 * count);
+                this.popupEndMinutes = totalEndMinutes;
+
+                if ((totalStartMinutes % 60) < 10) {
+                    this.popupStartTime = Math.floor(totalStartMinutes / 60) + ":0" + totalStartMinutes % 60;
+                }
+                else {
+                    this.popupStartTime = Math.floor(totalStartMinutes / 60) + ":" + totalStartMinutes % 60;
+                }
+                if ((totalEndMinutes % 60) < 10) {
+                    this.popupEndTime = Math.floor(totalEndMinutes / 60) + ":0" + totalEndMinutes % 60;
+                }
+                else {
+                    this.popupEndTime = Math.floor(totalEndMinutes / 60) + ":" + totalEndMinutes % 60;
+
+                }
+
+
+                //workout current month from date of a clicked button
+                var month;
+                if (this.popupDate < 15 && this.date > 15) {
+                    if (this.month == 11) {
+                        month = 0;
+                    }
+                    else {
+                        month = this.month + 1;
+                    }
+                }
+                else if (this.popupDate > 15 && this.date < 15) {
+                    if (this.month == 0) {
+                        month = 11;
+                    }
+                    else {
+                        month = this.month - 1;
+                    }
+                }
+                else {
+                    month = this.month;
+                }
+                this.popupMonth = this.monthsOfTheYear[month];
+
+                //workout current year from date of a clicked button
+                var year;
+
+                if (this.popupDate < 15 && this.date > 15 && this.month == 11) {
+                    year = this.year + 1;
+                    this.popupYear = year;
+                }
+                else if (this.popupDate > 15 && this.date < 15 && this.month == 0) {
+                    year = this.year - 1;
+                    this.popupYear = year;
+                }
+                this.popupYear = this.year;
+
+                var timeFrame = startingHour + ":00-" + endingHour + ":00";
+
+                this.$refs.inputTime.innerHTML = timeFrame;
+                this.timeFrame = this.$refs.inputTime.innerHTML;
+            },
+            submitBookingNonPeriod() {
+
+                var origiTimeFrame = this.timeFrame;
+
+                //check if time is correct format (HH:MM-HH:MM or H:MM-H:MM)
+                var timeFrame = this.$refs.inputTime.innerHTML;
+
+                if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]-([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeFrame) == false) {
+
+                    this.$refs.popupError.innerHTML = "Incorrect time format. Only HH:MM-HH:MM or H:MM-H:MM are valid.";
+
+                    return;
+                }
+
+                //retrieve end/start hours/minutes from input
+                var splitOnDash = timeFrame.split('-');
+                var startSplit = splitOnDash[0].split(':');
+                var endSplit = splitOnDash[1].split(':');
+
+                var startHour = startSplit[0];
+                var startMinute = startSplit[1];
+                var endHour = endSplit[0];
+                var endMinute = endSplit[1];
+
+                //remove leading zeros
+                startHour = parseInt(startHour, 10);
+                startMinute = parseInt(startMinute, 10);
+                endHour = parseInt(endHour, 10);
+                endMinute = parseInt(endMinute, 10);
+
+                //retrieve end/start hours/minutes from original Time Frame
+                var origiSplitOnDash = origiTimeFrame.split('-');
+                var origiStartSplit = origiSplitOnDash[0].split(':');
+                var origiEndSplit = origiSplitOnDash[1].split(':');
+
+                var origiStartHour = origiStartSplit[0];
+                var origiStartMinute = origiStartSplit[1];
+                var origiEndHour = origiEndSplit[0];
+                var origiEndMinute = origiEndSplit[1];
+
+                //remove leading zeros from original Time Frame
+                origiStartHour = parseInt(origiStartHour, 10);
+                origiStartMinute = parseInt(origiStartMinute, 10);
+                origiEndHour = parseInt(origiEndHour, 10);
+                origiEndMinute = parseInt(origiEndMinute, 10);
+
+
+                //round down to nearest 5min
+                if (startMinute % 10 == 1 || startMinute % 10 == 2 || startMinute % 10 == 3 || startMinute % 10 == 4) {
+                    startMinute = startMinute.toString().slice(0, -1) + '0';
+                    startMinute = parseInt(startMinute, 10);
+                }
+                else if (startMinute % 10 == 6 || startMinute % 10 == 7 || startMinute % 10 == 8 || startMinute % 10 == 9) {
+                    startMinute = startMinute.toString().slice(0, -1) + '5';
+                    startMinute = parseInt(startMinute, 10);
+                }
+                if (endMinute % 10 == 1 || endMinute % 10 == 2 || endMinute % 10 == 3 || endMinute % 10 == 4) {
+                    endMinute = endMinute.toString().slice(0, -1) + '0';
+                    endMinute = parseInt(endMinute, 10);
+                }
+                else if (endMinute % 10 == 6 || endMinute % 10 == 7 || endMinute % 10 == 8 || endMinute % 10 == 9) {
+                    endMinute = endMinute.toString().slice(0, -1) + '5';
+                    endMinute = parseInt(endMinute, 10);
+                }
+
+                //check if startTime < endTime
+                if (((startHour > endHour) || (startHour == endHour && startMinute > endMinute)) && (endHour!=0)) {
+
+                    this.$refs.popupError.innerHTML = "ERROR: Start time cannot be bigger than end time.";
+
+                    return;
+                }
+
+                //check if booking is at least 5 minutes
+                if (startHour == endHour && startMinute == endMinute) {
+
+                    this.$refs.popupError.innerHTML = "ERROR: Start and end time must be at least 5 minutes apart.";
+
+                    return;
+                }
+
+                //check if time is within the booking
+                var bookingStartMinutes = (startHour * 60) + startMinute;
+                var bookingEndMinutes = endHour * 60 + endMinute;
+
+                if (bookingStartMinutes < this.popupStartMinutes || bookingEndMinutes > this.popupEndMinutes) {
+
+                    this.$refs.popupError.innerHTML = "ERROR: Time must be within the booking slot.";
+
+                    return;
+                }
+
+                for (let i = 0; i < this.eventsList; i++) {
+                    if (this.eventsList[i].startHour == startHour &&
+                        this.eventsList[i].startMinute == startMinute &&
+                        this.eventsList[i].endHour == endHour &&
+                        this.eventsList[i].endMinute == endMinute &&
+                        this.eventsList[i].date == this.popupDate &&
+                        this.eventsList[i].month == this.monthsOfTheYear.indexOf(this.popupMonth) &&
+                        this.eventsList[i].year == this.popupYear) {
+
+                        this.eventsList.splice(i, 1);
+                    }
+                }
+
+                this.populateBookingEvents();
+
+                //window.location.reload();
+                console.log("booking2");
+                //post event info to server
+                axios({
+                    method: 'post',
+                    url: '/BookingSessionAPI/PostToCalendar',
+                    data: {
+                        "email": this.$refs.email.dataset.value,
+                        "periodName": this.$refs.inputPeriodName.value,
+                        "startHour": startHour,
+                        "startMinute": startMinute,
+                        "endHour": endHour,
+                        "endMinute": endMinute,
+                        "day": this.popupDay,
+                        "date": this.popupDate,
+                        "month": this.monthsOfTheYear.indexOf(this.popupMonth),
+                        "year": this.popupYear
+                    }
+                })
+                    .then(function (response) {
+                        console.log("ref");
+                        //window.location.href = "https://localhost:5001/ErrorHandler/RaceCondition";
+                        console.log(response);
+                    })
+                    .catch(function (error) {
+                        console.log("err");
+                        location.reload();
+                        console.log(error.response);
+                    });
+
+                /*
+                //disable popup
+                this.$refs.popupOverlay.classList.remove('active');
+                this.$refs.periodContainer.classList.remove('active');
+                this.$refs.nonPeriodContainer.classList.remove('active');
+                */
+            },
+            submitBookingPeriod() {
+                console.log("booking");
+                for (let i = 0; i < this.eventsList.length; i++) {
+                    if (this.eventsList[i].startHour == Math.floor(this.popupStartMinutes / 60) &&
+                        this.eventsList[i].startMinute == this.popupStartMinutes % 60 &&
+                        this.eventsList[i].endHour == Math.floor(this.popupEndMinutes / 60) &&
+                        this.eventsList[i].endMinute == this.popupEndMinutes % 60 &&
+                        this.eventsList[i].date == this.popupDate &&
+                        this.eventsList[i].month == this.monthsOfTheYear.indexOf(this.popupMonth) &&
+                        this.eventsList[i].year == this.popupYear) {
+
+                        this.eventsList.splice(i,1);
+                    }
+
+                    /*console.log(this.eventsList[i].startHour);
+                    console.log(this.eventsList[i].startHour + Math.floor(this.popupStartMinutes / 60) +
+                        this.eventsList[i].startMinute + this.popupStartMinutes % 60 +
+                        this.eventsList[i].endHour + Math.floor(this.popupEndMinutes / 60) +
+                        this.eventsList[i].endMinute + this.popupEndMinutes % 60 +
+                        this.eventsList[i].date + this.popupDate +
+                        this.eventsList[i].month + this.monthsOfTheYear.indexOf(this.popupMonth) +
+                        this.eventsList[i].year + this.popupYear);*/
+                }
+
+                
+
+                this.populateBookingEvents();
+
+                //window.location.reload();
+
+                //post event info to server
+                axios({
+                    method: 'post',
+                    url: '/BookingSessionAPI/PostToCalendar',
+                    data: {
+                        "email": this.$refs.email.dataset.value,
+                        "periodName": this.$refs.periodName.value,
+                        "startHour": Math.floor(this.popupStartMinutes/60),
+                        "startMinute": this.popupStartMinutes%60,
+                        "endHour": Math.floor(this.popupEndMinutes / 60),
+                        "endMinute": this.popupEndMinutes % 60,
+                        "day": this.popupDay,
+                        "date": this.popupDate,
+                        "month": this.monthsOfTheYear.indexOf(this.popupMonth),
+                        "year": this.popupYear
+                    }
+                })
+                    .then(function (response) {
+                        console.log("ref");
+                        //window.location.href = "https://localhost:5001/ErrorHandler/RaceCondition";
+                        console.log(response);
+                    })
+                    .catch(function (error) {
+                        console.log("err");
+                        location.reload();
+
+                        console.log(error.response);
+                    });
+
+            },
+            cancelBookingSession() {
+
+                //disable popup
+                this.$refs.periodContainer.classList.remove('active');
+                this.$refs.nonPeriodContainer.classList.remove('active');
+                this.$refs.popupOverlay.classList.remove('active');
+
+            },
+            populateBookingEvents() {
+
+                var weekDays = this.weekDates;
+
+                for (let i = 0; i < this.bookedEvents.length; i++) {
+                    if (this.bookedEvents[i].year == this.year && this.bookedEvents[i].month == this.month) {
+
+                        for (let j = 0; j < weekDays.length; j++) {
+                            if (this.bookedEvents[i].date == weekDays[j] && !(weekDays.includes(1) && weekDays[0] != 1 && this.date > 20 && this.bookedEvents[i].date < 10)) {
+
+
+                                //get the first button from start hrs+min
+                                var startHour = this.bookedEvents[i].startHour;
+                                var startMinute = this.bookedEvents[i].startMinute;
+                                var startDayOfWeek = this.bookedEvents[i].day;
+
+                                //index of button for already given day
+                                var kStart;
+                                if (startMinute == 0) {
+                                    kStart = 0 + (12 * startHour);
+                                } else {
+                                    kStart = (startMinute / 5) + (12 * startHour);
+                                }
+
+                                var firstButton = "but" + this.daysOfTheWeek.indexOf(startDayOfWeek) + "," + kStart;
+
+                                //get the last button from last hrs+min
+                                var endHour = this.bookedEvents[i].endHour;
+                                var endMinute = this.bookedEvents[i].endMinute;
+
+                                //index of last button for already given day
+                                var kEnd;
+
+                                if (endMinute == 0) {
+                                    kEnd = 0 + (12 * endHour);
+                                }
+                                else {
+                                    kEnd = (endMinute / 5) + (12 * endHour);
+                                }
+                                if (endMinute == 0 && endHour == 0) {
+                                    kEnd = 288;
+                                }
+
+                                this.$refs[firstButton][0].disabled = false;
+
+                                this.$refs[firstButton][0].innerText = "Booking Slot";
+
+                                this.$refs[firstButton][0].style.background = "#fca311";
+
+                                var deletedButton;
+                                var deletedButtonsCount = 1;
+                                for (let i = kStart + 1; i < kEnd; i++) {
+
+                                    deletedButton = "but" + this.daysOfTheWeek.indexOf(startDayOfWeek) + "," + i;
+                                    this.$refs[deletedButton][0].style.display = "none";
+                                    deletedButtonsCount++;
+                                }
+
+
+                                this.$refs[firstButton][0].style.cursor = "pointer";
+                                this.$refs[firstButton][0].style.height = 5 * deletedButtonsCount + "px";
+                                this.$refs[firstButton][0].style["border"] = "1px solid #ffffff";
+                            }
+                        }
+                    }
+                }
+            },
+        }
+
+
+    })
+</script>
+

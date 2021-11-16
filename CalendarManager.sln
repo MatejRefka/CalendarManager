@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalendarManager", "CalendarManager\CalendarManager.csproj", "{E0670BEB-0387-41E1-AF42-313E55BDCAE7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalendarManagerLibrary", "CalendarManagerLibrary\CalendarManagerLibrary.csproj", "{C2E9CBF5-0B19-43FF-A819-441BE8FA4D01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalendarMangerXUnitTests", "CalendarMangerXUnitTests\CalendarMangerXUnitTests.csproj", "{31BE6106-0D31-4229-903C-3C168CDB8858}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E0670BEB-0387-41E1-AF42-313E55BDCAE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0670BEB-0387-41E1-AF42-313E55BDCAE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0670BEB-0387-41E1-AF42-313E55BDCAE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0670BEB-0387-41E1-AF42-313E55BDCAE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2E9CBF5-0B19-43FF-A819-441BE8FA4D01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2E9CBF5-0B19-43FF-A819-441BE8FA4D01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2E9CBF5-0B19-43FF-A819-441BE8FA4D01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2E9CBF5-0B19-43FF-A819-441BE8FA4D01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31BE6106-0D31-4229-903C-3C168CDB8858}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31BE6106-0D31-4229-903C-3C168CDB8858}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31BE6106-0D31-4229-903C-3C168CDB8858}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31BE6106-0D31-4229-903C-3C168CDB8858}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E5AD8702-4B45-4391-89A0-D6C5D6B74ACB}
+	EndGlobalSection
+EndGlobal

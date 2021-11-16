@@ -1,0 +1,362 @@
+﻿html, body {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+header {
+    background: white;
+}
+body {
+    background: white;
+}
+body, body * {
+    font-family: 'Quicksand', sans-serif !important;
+    color: #ffffff;
+}
+/*HOME PAGE*/
+.homeItems {
+    position: absolute;
+    min-width: 98%;
+    margin-left: 1%;
+    margin-right: 1%;
+    min-height: 95vh;
+    margin-top: 5vh;
+    background-color: #14213d;
+    border-radius: 10px 10px 0px 0px;
+}
+.signInButton {
+    margin: 0 auto;
+    display: block;
+    border: 2px solid #14213d;
+    border-radius: 5px;
+    background-color: white;
+    padding: 14px 25px;
+    text-align: center;
+    text-decoration: none;
+    width: 200px;
+    font-size: 20px;
+    margin-top: 60px;
+    color: #14213d;
+}
+.homeItems p {
+    text-align: center;
+    font-size:20px;
+    font-weight:500;
+}
+.homeItems h1 {
+    text-align: center;
+    font-size:80px;
+    font-weight:900;
+    margin-bottom:0px;
+}
+
+
+
+
+/*HEADER*/
+.header {
+    background: white;
+    margin-left: 1vw;
+    height: 5vh;
+}
+.signInText {
+    color: #14213d;
+}
+.userEmail {
+    font-weight: 600;
+    margin-left: 5px;
+    color: #14213d;
+}
+.logout {
+    position: absolute;
+    right: 25px;
+    border-radius: 5px;
+    border: 1px solid #14213d;
+    cursor: pointer;
+    padding: 5px 10px 5px 10px;
+    background-color: white;
+    font-size: 15px;
+    color: #14213d;
+}
+
+/*CALENDAR POSITIONING*/
+.mainContent {
+    display: flex;
+    position: absolute;
+    min-width: 98%;
+    margin-left: 1%;
+    margin-right: 1%;
+    min-height: 93vh;
+    background-color: #14213d;
+    border-radius: 10px 10px 0px 0px;
+    }
+.fullCalendar {
+    padding-left: 2vw;
+    color:white;
+}
+
+/*CALENDAR CONTROL*/
+.calendarControl {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.currentMonthYear {
+    display: inline-block;
+    font-size: 28px;
+    font-weight: 900;
+    
+}
+.navButtons {
+    float: left;
+    margin-top:3px;
+    margin-left:50px;
+    padding-right: 10px;
+}
+.navButton {
+    cursor: pointer;
+    padding: 1px 7px 1px 7px;
+    background-color: #14213d;
+    border: 1px solid #ffffff;
+    font-size: 20px;
+    border-radius: 5px;
+    font-weight: 900;
+    
+}
+
+
+/*CALENDAR CONTENT*/
+.calendarHeader {
+    font-family: 'Quicksand', sans-serif;
+    float: left;
+    margin-left: 50px;
+}
+.headerCell {
+    width: 9vw;
+    border: 0px solid #ffffff;
+    
+}
+.headerWeek {
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 8px;
+    margin-bottom: 5px;
+}
+.headerDate {
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 0px;
+    margin-bottom: 5px;
+}
+.calendarTimeLabels {
+    position: relative;
+    margin-top: 32px;
+}
+.calendarTimeLabels tr{
+    height:60px;
+}
+.calendarBody {
+    float: left;
+    margin-left: 8px;
+}
+
+/*TABLE*/
+.bookingButton {
+    display: block;
+    width: 9vw;
+    height: 50px;
+    color: #ffffff;
+    font-weight: bold;
+    background-color: white;
+    cursor: pointer;
+}
+table, td, th {
+    border: 1px solid #ffffff;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+table.calendarTimeLabels td, table{
+    float:left;
+    border:none;
+}
+#calendarWrapper {
+    width: calc(100% + 18px);
+    clear: both;
+    overflow-y: auto;
+    height: 70vh;
+}
+
+/*ASIDE*/
+.sideMenu {
+    margin-left: 50px;
+    font-weight: 500;
+    margin-top:120px;
+    margin-right: 0px;
+}
+.boldText {
+    font-weight: 600;
+}
+.innerButton {
+    cursor: pointer;
+    padding: 0px 7px 0px 7px;
+    margin-left: 5px;
+    background-color: #14213d;
+    border: 1px solid #ffffff;
+    font-size: 20px;
+    border-radius: 5px;
+    font-weight: 900;
+}
+.formButton {
+    border-radius: 5px;
+    border: 1px solid #ffffff;
+    cursor: pointer;
+    padding: 5px 10px 5px 10px;
+    background-color: #14213d;
+    font-size: 15px;
+    display: block;
+    margin-top: 20px;
+}
+.innerText {
+    position: relative;
+    border-radius: 5px;
+    border: 1px solid #35455D;
+    font-size: 15px;
+    background-color: white;
+    height: 25px;
+    color: #14213d;
+}
+.innerTextLabel{
+    margin-bottom:5px;
+}
+.innerText:disabled {
+    background-color: #e5e5e5;
+}
+.longEvents {
+    margin-top:40px;
+}
+.longEvents li{
+    margin-left: -20px;
+}
+.eventDates{
+    margin-top:0px;
+}
+.dynamicUrl {
+    width: 20vw;
+    word-wrap: break-word
+}
+
+
+
+/*BOOKING POPUP*/
+.popupBox {
+    display: flex;
+}
+/*Booking Popup: https://github.com/WebDevSimplified/Vanilla-JavaScript-Modal/blob/master/styles.css*/
+.bookingPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    border: 1px solid black;
+    border-radius: 10px;
+    z-index: 10;
+    background-color: white;
+    width: 350px;
+    max-width: 80%;
+    padding: 0px 10px 10px 10px;
+    transition: 200ms ease-in-out;
+}
+.bookingPopup.active {
+    transform: translate(-50%, -50%) scale(1);
+}
+.popupTitle{
+    color: #14213d;
+}
+.popupTime {
+    display:flex;
+}
+.overlay {
+    position: fixed;
+    opacity: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,.5);
+    pointer-events: none;
+    transition: 200ms ease-in-out;
+}
+.overlay.active{
+    pointer-events:all;
+    opacity: 1;
+}
+.outerText {
+    border-radius: 5px;
+    border: 1px solid #35455D;
+    font-size: 15px;
+    background-color: white;
+    height: 30px;
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 5px;
+    color: #14213d;
+}
+.outerButton {
+    border-radius: 5px;
+    border: 1px solid #35455D;
+    cursor: pointer;
+    padding: 5px 10px 5px 10px;
+    background-color: white;
+    font-size: 15px;
+    margin-left: 5px;
+    margin-right: 5px;
+    color: #14213d;
+}
+
+/*BOOKING CALENDAR*/
+.bookingHeader {
+    background: white;
+    margin-left: 1vw;
+    height: 3vh;
+}
+.bookingMainContent {
+    display: flex;
+    position: absolute;
+    min-width: 98%;
+    margin-left: 1%;
+    margin-right: 1%;
+    min-height: 97vh;
+    background-color: #14213d;
+    border-radius: 10px 10px 0px 0px;
+}
+.bookingBookingButton {
+    display: block;
+    width: 9vw;
+    height: 50px;
+    color: #ffffff;
+    font-weight: bold;
+    background-color: white;
+    cursor: default;
+}
+
+@media ( max-width: 1915px) {
+    .calendarTimeLabels {
+        display: none;
+    }
+    .calendarHeader{
+        margin-left:0px;
+    }
+}
+@media ( max-width: 1200px) {
+    .mainContent {
+        display: block;
+    }
+    .bookingButton {
+        display: block;
+        width: 14vw;
+    }
+    .calendarHeader {
+        display: none;
+    }
+}
+
+
